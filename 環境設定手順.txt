@@ -1,0 +1,53 @@
+Docker環境設定手順
+
+環境
+・ruby_ver="2.7.0"
+・rails_ver="6.0.2.1"
+・PostgreSQL: 11.6
+
+注意；Docker Quickstart Terminalは管理者権限で実行すること。（シンボリックリンクでエラーが発生します）
+
+
+①下記のファイルが存在することを確認する。
+docker-compose.yml
+Dockerfile
+Gemfile
+Gemfile.lock
+
+②docker-composeが存在するフォルダ内で、docker-compose buildを実行する。
+$ docker-compose build # コンテナをビルド
+
+③Docker起動
+$ docker-compose up -d # コンテナの一斉作成・起動　※ -dオプションをつけるとバックグラウンド実行
+
+
+④railsコンテナを起動する。
+$ docker exec -it rails6_web bash
+
+⑤docker-composeが存在するフォルダ内で、rails newを実行する。
+$ rails new . --force --no-deps --database=postgresql
+
+⑥bundleのアップデート
+$ bundle install 
+
+⑦Webpackerのインストール
+$ rails webpacker:install
+
+⑧database.ymlを修正する
+パス：/config/database.yml
+
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # 追記
+  host: db
+  port: <%= ENV.fetch('DATABASE_PORT') { 5432 } %>
+  username: <%= ENV.fetch('DATABASE_USER') { 'root' } %>
+  password: <%= ENV.fetch('DATABASE_PASSWORD') { 'password' } %>
+
+⑨DB作成
+$ rails db:create
+
+
+※起動コマンド
+docker-compose start ※一斉起動
+docker-compose stop  ※一斉停止
+bundle exec rails s -p 3000 -b '0.0.0.0' ※Railsサーバ起動
